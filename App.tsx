@@ -7,6 +7,11 @@ import Dashboard from './views/Dashboard';
 import VendorsView from './views/VendorsView';
 import ProductsView from './views/ProductsView';
 import DistributionView from './views/DistributionView';
+import NotificationsView from './views/NotificationsView';
+import ProfileView from './views/ProfileView';
+import SettingsView from './views/SettingsView';
+import LogsView from './views/LogsView';
+import SupportView from './views/SupportView';
 import { View, Vendor } from './types';
 import { supabase } from './supabaseClient';
 import { Session } from '@supabase/supabase-js';
@@ -44,6 +49,11 @@ const App: React.FC = () => {
       case View.VENDORS: return <VendorsView onSelectVendor={(v: Vendor | null) => setSelectedEntityName(v?.name)} />;
       case View.PRODUCTS: return <ProductsView />;
       case View.DISTRIBUTION: return <DistributionView />;
+      case View.NOTIFICATIONS: return <NotificationsView />;
+      case View.PROFILE: return <ProfileView />;
+      case View.SETTINGS: return <SettingsView />;
+      case View.LOGS: return <LogsView />;
+      case View.SUPPORT: return <SupportView />;
       default: return <Dashboard />;
     }
   };

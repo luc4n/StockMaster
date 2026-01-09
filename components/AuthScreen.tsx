@@ -40,8 +40,10 @@ const AuthScreen: React.FC = () => {
                             inventory_2
                         </span>
                     </div>
-                    <h1 className="text-4xl font-extrabold tracking-tight mb-2 relative z-10">StockMaster</h1>
-                    <p className="text-primary-light opacity-90 relative z-10">Gestão de Vendedores e Estoque</p>
+                    <h1 className="text-6xl font-black mb-2 relative z-10 leading-tight" style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.15em' }}>
+                        <span className="text-white">Gestão inteligente de</span>{' '}
+                        <span className="text-blue-400">estoque</span>
+                    </h1>
                 </div>
 
                 {/* Form Section */}

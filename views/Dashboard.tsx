@@ -79,14 +79,14 @@ const Dashboard: React.FC = () => {
     <div className="max-w-[1300px] mx-auto flex flex-col gap-10 pb-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-gray-900 dark:text-white text-5xl font-black leading-tight tracking-tighter">
-            Stock<span className="text-primary italic">Master</span>
+          <h1 className="text-7xl font-black leading-tight" style={{ fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.15em' }}>
+            <span className="text-gray-900 dark:text-white">Gestão inteligente de</span>{' '}
+            <span className="text-blue-600 dark:text-blue-400">estoque</span>
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-lg mt-2">Gestão inteligente de estoque externo e performance de vendedores.</p>
         </div>
         <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-6 py-3 text-sm font-bold text-gray-700 dark:text-white shadow-premium hover:shadow-premium-hover hover:-translate-y-1 transition-all">
           <span className="material-symbols-outlined text-xl">file_download</span>
-          Exportar Inteligência
+          Exportar
         </button>
       </div>
 

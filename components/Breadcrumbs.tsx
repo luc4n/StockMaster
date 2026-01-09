@@ -12,19 +12,23 @@ interface BreadcrumbsProps {
 const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ currentView, onViewChange, subPath, onClearSubPath }) => {
   const getViewLabel = (view: View) => {
     switch (view) {
-      case View.DASHBOARD: return 'Dashboard';
+      case View.DASHBOARD: return 'Painel';
       case View.VENDORS: return 'Vendedores';
       case View.PRODUCTS: return 'Catálogo';
       case View.DISTRIBUTION: return 'Distribuição';
       case View.REPORTS: return 'Relatórios';
       case View.SETTINGS: return 'Configurações';
+      case View.NOTIFICATIONS: return 'Notificações';
+      case View.PROFILE: return 'Meu Perfil';
+      case View.LOGS: return 'Logs de Atividade';
+      case View.SUPPORT: return 'Suporte';
       default: return 'Sistema';
     }
   };
 
   return (
     <nav className="flex items-center gap-2 text-sm overflow-hidden whitespace-nowrap" aria-label="Breadcrumb">
-      <button 
+      <button
         onClick={() => onViewChange(View.DASHBOARD)}
         className="text-[#617589] dark:text-gray-500 hover:text-primary transition-colors flex items-center gap-1"
       >
@@ -34,10 +38,10 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ currentView, onViewChange, su
 
       <span className="material-symbols-outlined text-xs text-[#617589] dark:text-gray-500">chevron_right</span>
 
-      <button 
+      <button
         onClick={() => {
-            onViewChange(currentView);
-            if (onClearSubPath) onClearSubPath();
+          onViewChange(currentView);
+          if (onClearSubPath) onClearSubPath();
         }}
         className={`transition-colors ${!subPath ? 'font-bold text-[#111418] dark:text-white cursor-default' : 'text-[#617589] dark:text-gray-500 hover:text-primary'}`}
       >

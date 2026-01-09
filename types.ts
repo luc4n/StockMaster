@@ -5,7 +5,11 @@ export enum View {
   PRODUCTS = 'PRODUCTS',
   DISTRIBUTION = 'DISTRIBUTION',
   REPORTS = 'REPORTS',
-  SETTINGS = 'SETTINGS'
+  SETTINGS = 'SETTINGS',
+  NOTIFICATIONS = 'NOTIFICATIONS',
+  PROFILE = 'PROFILE',
+  LOGS = 'LOGS',
+  SUPPORT = 'SUPPORT'
 }
 
 export interface Vendor {
@@ -32,4 +36,13 @@ export interface Product {
 
 export interface CartItem extends Product {
   quantity: number;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'customer' | 'system' | 'inventory';
+  is_read: boolean;
+  created_at: string;
 }
