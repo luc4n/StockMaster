@@ -67,10 +67,10 @@ const DistributionModal: React.FC<DistributionModalProps> = ({ isOpen, onClose, 
 
             // 3. Send Telegram Alert
             const vendor = vendors.find(v => v.id === selectedVendor);
-            const msg = `📦 *Nova Saída de Estoque*\n\n` +
-                `👤 *Vendedor:* ${vendor?.name || 'N/A'}\n` +
-                `🛒 *Produto:* ${product?.name || 'N/A'}\n` +
-                `🔢 *Quantidade:* ${quantity} un\n` +
+            const msg = `📦 *Nova Saída de Estoque*\\n\\n` +
+                `👤 *Vendedor:* ${vendor?.name || 'N/A'}\\n` +
+                `🛒 *Produto:* ${product?.name || 'N/A'}\\n` +
+                `🔢 *Quantidade:* ${quantity} un\\n` +
                 `📝 *Notas:* ${notes || '-'}`;
             sendTelegramMessage(msg);
 

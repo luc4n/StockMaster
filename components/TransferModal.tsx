@@ -112,11 +112,11 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, onSucces
             const fromVendor = vendors.find(v => v.id === fromVendorId);
             const toVendor = vendors.find(v => v.id === toVendorId);
             const product = originStock.find(p => p.id === selectedProduct);
-            const msg = `🔄 *Nova Transferência de Estoque*\n\n` +
-                `📤 *De:* ${fromVendor?.name || 'N/A'}\n` +
-                `📥 *Para:* ${toVendor?.name || 'N/A'}\n` +
-                `🛒 *Produto:* ${product?.name || 'N/A'}\n` +
-                `🔢 *Quantidade:* ${quantity} un\n` +
+            const msg = `🔄 *Nova Transferência de Estoque*\\n\\n` +
+                `📤 *De:* ${fromVendor?.name || 'N/A'}\\n` +
+                `📥 *Para:* ${toVendor?.name || 'N/A'}\\n` +
+                `🛒 *Produto:* ${product?.name || 'N/A'}\\n` +
+                `🔢 *Quantidade:* ${quantity} un\\n` +
                 `📝 *Notas:* ${notes || '-'}`;
             sendTelegramMessage(msg);
 

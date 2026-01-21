@@ -94,7 +94,7 @@ const NotificationsView: React.FC = () => {
                     <span className="text-primary font-black uppercase tracking-[0.2em] text-[10px]">Central de Comando</span>
                 </div>
                 <h1 className="text-gray-900 dark:text-white text-5xl font-black leading-tight tracking-tighter">
-                    Notificações <span className="text-primary">Inteligentes</span>
+                    Notificações
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-lg font-medium max-w-2xl">
                     Monitore o pulso da sua operação com alertas em tempo real e insights sobre interações de clientes.

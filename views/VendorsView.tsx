@@ -40,12 +40,12 @@ const VendorsView: React.FC<VendorsViewProps> = ({ onSelectVendor }) => {
         };
 
         const items = vendorDists.reduce((acc, d) => {
-          const isAdd = d.type === 'Saída' || d.type === 'Transferência (Entrada)';
+          const isAdd = d.type === 'Saída' || d.type === 'Transferência (Entrada)' || d.type === 'Carga';
           return isAdd ? acc + (d.quantity || 0) : acc - (d.quantity || 0);
         }, 0);
         const val = vendorDists.reduce((acc, d) => {
           const itemVal = (d.quantity || 0) * getPrice(d.products);
-          const isAdd = d.type === 'Saída' || d.type === 'Transferência (Entrada)';
+          const isAdd = d.type === 'Saída' || d.type === 'Transferência (Entrada)' || d.type === 'Carga';
           return isAdd ? acc + itemVal : acc - itemVal;
         }, 0);
 
@@ -115,11 +115,35 @@ const VendorsView: React.FC<VendorsViewProps> = ({ onSelectVendor }) => {
     onSelectVendor(null);
   };
 
-  const salesHistory = [
-    { date: '24/10/2023', items: 12, value: 'R$ 1.200,00', type: 'Carga' },
-    { date: '20/10/2023', items: 5, value: 'R$ 450,00', type: 'Venda' },
-    { date: '15/10/2023', items: 8, value: 'R$ 890,00', type: 'Venda' },
-  ];
+  const [vendorHistory, setVendorHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (selectedVendor) {
+      const fetchHistory = async () => {
+        const { data } = await supabase
+          .from('distribution')
+          .select('created_at, type, quantity, products(name, price)')
+          .eq('vendor_id', selectedVendor.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (data) {
+          const formatted = data.map((d: any) => {
+            const price = Array.isArray(d.products) ? d.products[0]?.price : d.products?.price;
+            const total = (d.quantity || 0) * (price || 0);
+            return {
+              date: new Date(d.created_at).toLocaleDateString('pt-BR'),
+              items: d.quantity,
+              value: `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              type: d.type
+            };
+          });
+          setVendorHistory(formatted);
+        }
+      };
+      fetchHistory();
+    }
+  }, [selectedVendor]);
 
   return (
     <div className="max-w-[1200px] mx-auto flex flex-col gap-8 pb-10 relative">
@@ -343,9 +367,12 @@ const VendorsView: React.FC<VendorsViewProps> = ({ onSelectVendor }) => {
 
               <div className="flex flex-col gap-4">
                 <h4 className="text-sm font-bold uppercase text-gray-400 tracking-widest">Histórico Recente</h4>
-                {salesHistory.map((act, i) => (
+                {vendorHistory.map((act, i) => (
                   <div key={i} className="flex items-center justify-between p-3 rounded-xl border dark:border-gray-800">
-                    <span className="text-sm font-bold dark:text-white">{act.type}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold dark:text-white">{act.type}</span>
+                      <span className="text-xs text-gray-400">{act.date} • {act.items} itens</span>
+                    </div>
                     <span className="text-sm font-bold dark:text-white">{act.value}</span>
                   </div>
                 ))}
