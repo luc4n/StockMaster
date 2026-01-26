@@ -2,19 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { supabase } from '../supabaseClient';
+import AddProductModal from '../components/AddProductModal';
+import { toast } from 'sonner';
 
 const ProductsView: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  // Form State
-  const [newName, setNewName] = useState('');
-  const [newPrice, setNewPrice] = useState('');
-  const [newSku, setNewSku] = useState('');
-  const [newStock, setNewStock] = useState('0');
-  const [newStatus, setNewStatus] = useState('Em Estoque');
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(15);
 
@@ -46,55 +41,21 @@ const ProductsView: React.FC = () => {
 
   const handleEditClick = (product: Product) => {
     setEditingProduct(product);
-    setNewName(product.name);
-    setNewPrice(product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }));
-    setNewSku(product.sku);
-    setNewStock(product.stock.toString());
-    setNewStatus(product.status || 'Em Estoque');
-    setIsAddingProduct(true);
+    setIsModalOpen(true);
   };
 
-  const handleClosePanel = () => {
-    setIsAddingProduct(false);
-    setEditingProduct(null);
-    setNewName('');
-    setNewPrice('');
-    setNewSku('');
-    setNewStock('0');
-    setNewStatus('Em Estoque');
-  };
-
-  const handleCreateOrUpdateProduct = async () => {
-    if (!newName || !newSku) return;
+  const handleDeleteProduct = async (id: string) => {
+    if (!window.confirm('Deseja realmente excluir este produto? Esta ação não pode ser desfeita.')) return;
 
     setLoading(true);
-    const productData = {
-      name: newName,
-      sku: newSku,
-      price: parseFloat(newPrice.replace('.', '').replace(',', '.')),
-      stock_internal: parseInt(newStock),
-      status: newStatus,
-      image_url: `https://picsum.photos/seed/${newSku}/200`
-    };
-
-    let error;
-    if (editingProduct) {
-      const { error: updateError } = await supabase
-        .from('products')
-        .update(productData)
-        .eq('id', editingProduct.id);
-      error = updateError;
-    } else {
-      const { error: insertError } = await supabase
-        .from('products')
-        .insert(productData);
-      error = insertError;
-    }
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
 
     if (error) {
-      alert('Erro ao salvar produto: ' + error.message);
+      alert('Erro ao excluir produto: ' + error.message);
     } else {
-      handleClosePanel();
       fetchProducts();
     }
     setLoading(false);
@@ -113,11 +74,10 @@ const ProductsView: React.FC = () => {
     }
   };
 
-  const filteredProducts = products
-    .filter(p =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.sku.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const displayedProducts = filteredProducts.slice(0, visibleCount);
 
@@ -135,8 +95,11 @@ const ProductsView: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => setIsAddingProduct(true)}
-          className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 bg-primary hover:bg-blue-600 text-white text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+          onClick={() => {
+            setEditingProduct(null);
+            setIsModalOpen(true);
+          }}
+          className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 bg-primary hover:bg-primary-dark text-white text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
         >
           <span className="material-symbols-outlined text-[20px]">add</span>
           <span>Novo Produto</span>
@@ -150,7 +113,7 @@ const ProductsView: React.FC = () => {
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3 top-2 text-gray-400">search</span>
                 <input
-                  className="h-10 pl-10 pr-4 rounded-lg bg-gray-50 dark:bg-gray-900 border-none ring-1 ring-gray-200 dark:ring-gray-700 w-64 md:w-80 text-sm"
+                  className="h-10 pl-10 pr-4 rounded-lg bg-gray-50 dark:bg-gray-900 border-none ring-1 ring-gray-200 dark:ring-gray-700 w-64 md:w-80 text-sm dark:text-white"
                   placeholder="Buscar por nome ou SKU..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -198,14 +161,19 @@ const ProductsView: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100">
+                      <div className="flex justify-end gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEditClick(p)}
-                          className="text-gray-400 hover:text-primary p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                          className="text-gray-400 hover:text-primary p-1.5 hover:bg-primary/10 rounded-lg transition-all"
+                          title="Editar Produto"
                         >
                           <span className="material-symbols-outlined text-[20px]">edit</span>
                         </button>
-                        <button className="text-gray-400 hover:text-red-500 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                        <button
+                          onClick={() => handleDeleteProduct(p.id)}
+                          className="text-gray-400 hover:text-rose-500 p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
+                          title="Excluir Produto"
+                        >
                           <span className="material-symbols-outlined text-[20px]">delete</span>
                         </button>
                       </div>
@@ -232,103 +200,15 @@ const ProductsView: React.FC = () => {
         </div>
       </div>
 
-      {isAddingProduct && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={handleClosePanel}></div>
-          <div className="relative w-full max-w-md bg-white dark:bg-[#101922] h-full shadow-2xl flex flex-col animate-slide-in-right overflow-y-auto">
-            <div className="p-6 border-b dark:border-gray-800 flex items-center justify-between bg-primary/5">
-              <h3 className="text-xl font-black text-[#111418] dark:text-white">{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h3>
-              <button onClick={handleClosePanel} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            <div className="p-6 flex flex-col gap-5">
-              <label className="flex flex-col gap-2">
-                <span className="text-sm font-semibold dark:text-gray-200">Nome do Produto</span>
-                <input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="rounded-lg border-[#dbe0e6] dark:border-gray-700 dark:bg-gray-900 dark:text-white h-12 px-4 outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Ex: Kit de Ferramentas Pro"
-                />
-              </label>
-
-              <div className="grid grid-cols-2 gap-4">
-                <label className="flex flex-col gap-2">
-                  <span className="text-sm font-semibold dark:text-gray-200">Preço (R$)</span>
-                  <input
-                    value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
-                    className="rounded-lg border-[#dbe0e6] dark:border-gray-700 dark:bg-gray-900 dark:text-white h-12 px-4 outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="0,00"
-                  />
-                </label>
-                <label className="flex flex-col gap-2">
-                  <span className="text-sm font-semibold dark:text-gray-200">SKU / Cód.</span>
-                  <input
-                    value={newSku}
-                    onChange={(e) => setNewSku(e.target.value)}
-                    className="rounded-lg border-[#dbe0e6] dark:border-gray-700 dark:bg-gray-900 dark:text-white h-12 px-4 outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="REF-000"
-                  />
-                </label>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <label className="flex flex-col gap-2">
-                  <span className="text-sm font-semibold dark:text-gray-200">{editingProduct ? 'Estoque Atual' : 'Estoque Inicial'}</span>
-                  <input
-                    type="number"
-                    value={newStock}
-                    onChange={(e) => setNewStock(e.target.value)}
-                    className="rounded-lg border-[#dbe0e6] dark:border-gray-700 dark:bg-gray-900 dark:text-white h-12 px-4 outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="0"
-                  />
-                </label>
-                <label className="flex flex-col gap-2">
-                  <span className="text-sm font-semibold dark:text-gray-200">Status</span>
-                  <select
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value)}
-                    className="rounded-lg border-[#dbe0e6] dark:border-gray-700 dark:bg-gray-900 dark:text-white h-12 px-4 outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option>Em Estoque</option>
-                    <option>Baixo Estoque</option>
-                    <option>Indisponível</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={handleCreateOrUpdateProduct}
-                  disabled={loading || !newName || !newSku}
-                  className="flex-1 h-12 bg-primary hover:bg-blue-600 text-white font-bold rounded-lg shadow-lg shadow-blue-500/20 disabled:opacity-50 transition-all flex items-center justify-center"
-                >
-                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Salvar Produto'}
-                </button>
-                <button
-                  onClick={handleClosePanel}
-                  className="h-12 px-6 bg-white dark:bg-gray-800 border border-[#dbe0e6] dark:border-gray-700 text-[#111418] dark:text-white font-bold rounded-lg"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes slide-in-right {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-slide-in-right {
-          animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-      `}</style>
+      <AddProductModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingProduct(null);
+        }}
+        onSuccess={fetchProducts}
+        editingProduct={editingProduct}
+      />
     </div>
   );
 };

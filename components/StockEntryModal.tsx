@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { sendTelegramMessage } from '../services/telegramService';
+import { toast } from 'sonner';
 
 interface StockEntryModalProps {
     isOpen: boolean;
@@ -38,13 +39,10 @@ const StockEntryModal: React.FC<StockEntryModalProps> = ({ isOpen, onClose, onSu
         setLoading(true);
         try {
             const product = products.find(p => p.id === selectedProduct);
-            const currentStock = product?.stock_internal || 0;
-            const newStock = currentStock + quantityToAdd;
+            const newStock = (product?.stock_internal || 0) + quantityToAdd;
 
-            const { error } = await supabase
-                .from('products')
-                .update({ stock_internal: newStock })
-                .eq('id', selectedProduct);
+            // 1. Update stock via RPC (atomic)
+            const { error } = await supabase.rpc('increment_stock', { p_id: selectedProduct, amount: quantityToAdd });
 
             if (error) throw error;
 
@@ -55,12 +53,9 @@ const StockEntryModal: React.FC<StockEntryModalProps> = ({ isOpen, onClose, onSu
                 `📉 *Novo Saldo:* ${newStock} un`;
             sendTelegramMessage(msg);
 
-            onSuccess();
-            onClose();
-            setSelectedProduct('');
-            setQuantityToAdd(1);
+            toast.success('Abastecimento realizado com sucesso!');
         } catch (error: any) {
-            alert('Erro ao adicionar estoque: ' + error.message);
+            toast.error('Erro ao adicionar estoque: ' + error.message);
         } finally {
             setLoading(false);
         }

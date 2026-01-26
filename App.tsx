@@ -11,10 +11,12 @@ import NotificationsView from './views/NotificationsView';
 import ProfileView from './views/ProfileView';
 import SettingsView from './views/SettingsView';
 import LogsView from './views/LogsView';
+import ReportsView from './views/ReportsView';
 import SupportView from './views/SupportView';
 import { View, Vendor } from './types';
 import { supabase } from './supabaseClient';
 import { Session } from '@supabase/supabase-js';
+import { Toaster } from 'sonner';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
@@ -24,13 +26,15 @@ const App: React.FC = () => {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    // 1. Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setInitializing(false);
+    }).catch(() => {
+      setInitializing(false);
     });
 
-    // Listen for changes
+    // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -58,18 +62,13 @@ const App: React.FC = () => {
       } : { r: 19, g: 127, b: 236 };
     };
 
-    // Generate light background from accent color (more subtle approach)
     const rgb = hexToRgb(savedAccent);
-    // Mix with white (80% white, 20% accent color) for a visible but pleasant tint
     const lightBg = `rgb(${Math.round(255 * 0.8 + rgb.r * 0.2)}, ${Math.round(255 * 0.8 + rgb.g * 0.2)}, ${Math.round(255 * 0.8 + rgb.b * 0.2)})`;
 
-    // Apply Accent and variations
     document.documentElement.style.setProperty('--primary', savedAccent);
     document.documentElement.style.setProperty('--primary-light', savedAccent + 'cc');
     document.documentElement.style.setProperty('--primary-dark', savedAccent);
     document.documentElement.style.setProperty('--bg-light', lightBg);
-
-    // Apply Font
     document.documentElement.style.setProperty('--font-family', savedFont);
   }, []);
 
@@ -88,6 +87,7 @@ const App: React.FC = () => {
       case View.PROFILE: return <ProfileView />;
       case View.SETTINGS: return <SettingsView />;
       case View.LOGS: return <LogsView />;
+      case View.REPORTS: return <ReportsView />;
       case View.SUPPORT: return <SupportView />;
       default: return <Dashboard />;
     }
@@ -106,7 +106,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-background-light dark:bg-background-dark">
       <Sidebar
         currentView={currentView}
         onViewChange={handleViewChange}
@@ -114,7 +114,7 @@ const App: React.FC = () => {
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      <div className="flex flex-1 flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark transition-colors duration-500">
+      <div className="flex flex-1 flex-col h-full overflow-hidden transition-colors duration-500">
         <Header
           currentView={currentView}
           onViewChange={handleViewChange}
@@ -127,6 +127,7 @@ const App: React.FC = () => {
           {renderContent()}
         </main>
       </div>
+      <Toaster position="top-right" richColors closeButton />
     </div>
   );
 };

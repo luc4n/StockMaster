@@ -31,7 +31,7 @@ const AuthScreen: React.FC = () => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background-light dark:bg-background-dark p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#f0f7ff] dark:bg-[#0f172a] p-4">
             <div className="w-full max-w-md bg-white dark:bg-surface-dark rounded-3xl shadow-2xl overflow-hidden border border-border-light dark:border-border-dark flex flex-col">
                 {/* Header/Banner Section */}
                 <div className="bg-primary p-12 text-center text-white relative">

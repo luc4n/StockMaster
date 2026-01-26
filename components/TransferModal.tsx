@@ -7,9 +7,11 @@ interface TransferModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    defaultProductId?: string;
+    defaultFromVendorId?: string;
 }
 
-const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, onSuccess, defaultProductId, defaultFromVendorId }) => {
     const [loading, setLoading] = useState(false);
     const [vendors, setVendors] = useState<any[]>([]);
     const [originStock, setOriginStock] = useState<any[]>([]);
@@ -23,8 +25,17 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, onSucces
     useEffect(() => {
         if (isOpen) {
             fetchVendors();
+            if (defaultFromVendorId) setFromVendorId(defaultFromVendorId);
+            if (defaultProductId) setSelectedProduct(defaultProductId);
+        } else {
+            // Reset
+            setFromVendorId('');
+            setToVendorId('');
+            setSelectedProduct('');
+            setQuantity(1);
+            setNotes('');
         }
-    }, [isOpen]);
+    }, [isOpen, defaultFromVendorId, defaultProductId]);
 
     const fetchVendors = async () => {
         setLoading(true);
@@ -112,11 +123,11 @@ const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, onSucces
             const fromVendor = vendors.find(v => v.id === fromVendorId);
             const toVendor = vendors.find(v => v.id === toVendorId);
             const product = originStock.find(p => p.id === selectedProduct);
-            const msg = `🔄 *Nova Transferência de Estoque*\n\n` +
-                `📤 *De:* ${fromVendor?.name || 'N/A'}\n` +
-                `📥 *Para:* ${toVendor?.name || 'N/A'}\n` +
-                `🛒 *Produto:* ${product?.name || 'N/A'}\n` +
-                `🔢 *Quantidade:* ${quantity} un\n` +
+            const msg = `🔄 *Nova Transferência de Estoque*\\n\\n` +
+                `📤 *De:* ${fromVendor?.name || 'N/A'}\\n` +
+                `📥 *Para:* ${toVendor?.name || 'N/A'}\\n` +
+                `🛒 *Produto:* ${product?.name || 'N/A'}\\n` +
+                `🔢 *Quantidade:* ${quantity} un\\n` +
                 `📝 *Notas:* ${notes || '-'}`;
             sendTelegramMessage(msg);
 

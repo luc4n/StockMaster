@@ -2,14 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { sendTelegramMessage } from '../services/telegramService';
+import { toast } from 'sonner';
 
 interface ReturnModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    defaultProductId?: string;
+    defaultVendorId?: string;
 }
 
-const ReturnModal: React.FC<ReturnModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ReturnModal: React.FC<ReturnModalProps> = ({ isOpen, onClose, onSuccess, defaultProductId, defaultVendorId }) => {
     const [loading, setLoading] = useState(false);
     const [vendors, setVendors] = useState<any[]>([]);
     const [vendorStock, setVendorStock] = useState<any[]>([]);
@@ -22,8 +25,16 @@ const ReturnModal: React.FC<ReturnModalProps> = ({ isOpen, onClose, onSuccess })
     useEffect(() => {
         if (isOpen) {
             fetchVendors();
+            if (defaultVendorId) setSelectedVendor(defaultVendorId);
+            if (defaultProductId) setSelectedProduct(defaultProductId);
+        } else {
+            // Reset on close
+            setSelectedVendor('');
+            setSelectedProduct('');
+            setQuantity(1);
+            setNotes('');
         }
-    }, [isOpen]);
+    }, [isOpen, defaultVendorId, defaultProductId]);
 
     const fetchVendors = async () => {
         setLoading(true);
@@ -93,36 +104,24 @@ const ReturnModal: React.FC<ReturnModalProps> = ({ isOpen, onClose, onSuccess })
 
             if (distError) throw distError;
 
-            // 2. Increment internal stock
-            const { data: currentProd } = await supabase.from('products').select('stock_internal').eq('id', selectedProduct).single();
-            const newStock = (currentProd?.stock_internal || 0) + quantity;
-
-            const { error: prodError } = await supabase
-                .from('products')
-                .update({ stock_internal: newStock })
-                .eq('id', selectedProduct);
+            // 2. Increment internal stock via RPC
+            const { error: prodError } = await supabase.rpc('increment_stock', { p_id: selectedProduct, amount: quantity });
 
             if (prodError) throw prodError;
 
             // 3. Send Telegram Alert
             const vendor = vendors.find(v => v.id === selectedVendor);
             const product = vendorStock.find(p => p.id === selectedProduct);
-            const msg = `🔙 *Nova Devolução de Estoque*\n\n` +
-                `👤 *Vendedor:* ${vendor?.name || 'N/A'}\n` +
-                `🛒 *Produto:* ${product?.name || 'N/A'}\n` +
-                `🔢 *Quantidade:* ${quantity} un\n` +
+            const msg = `🔙 *Nova Devolução de Estoque*\\n\\n` +
+                `👤 *Vendedor:* ${vendor?.name || 'N/A'}\\n` +
+                `🛒 *Produto:* ${product?.name || 'N/A'}\\n` +
+                `🔢 *Quantidade:* ${quantity} un\\n` +
                 `📝 *Notas:* ${notes || '-'}`;
             sendTelegramMessage(msg);
 
-            onSuccess();
-            onClose();
-            // Reset form
-            setSelectedVendor('');
-            setSelectedProduct('');
-            setQuantity(1);
-            setNotes('');
+            toast.success('Devolução registrada com sucesso!');
         } catch (error: any) {
-            alert('Erro ao registrar devolução: ' + error.message);
+            toast.error('Erro ao registrar devolução: ' + error.message);
         } finally {
             setLoading(false);
         }

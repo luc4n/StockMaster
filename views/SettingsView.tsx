@@ -138,6 +138,8 @@ const SettingsView: React.FC = () => {
         }
     };
 
+
+
     if (activeTab === 'integrations') {
         return (
             <div className="max-w-[900px] mx-auto flex flex-col gap-8 pb-16">
@@ -420,6 +422,89 @@ const SettingsView: React.FC = () => {
         );
     }
 
+    if (activeTab === 'security') {
+        return (
+            <div className="max-w-[700px] mx-auto flex flex-col gap-8 pb-16">
+                <button
+                    onClick={() => setActiveTab('menu')}
+                    className="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors font-bold text-sm"
+                >
+                    <span className="material-symbols-outlined">arrow_back</span>
+                    Voltar para Configurações
+                </button>
+
+                <div className="flex flex-col gap-2 text-center md:text-left">
+                    <h1 className="text-gray-900 dark:text-white text-5xl font-black leading-tight tracking-tighter">
+                        Segurança da <span className="text-primary">Conta</span>
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
+                        Proteja seu acesso e gerencie suas credenciais.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                    {/* Password Change */}
+                    <div className="bg-white dark:bg-surface-dark p-8 rounded-[2.5rem] shadow-premium border border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="size-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                                <span className="material-symbols-outlined text-2xl font-bold">lock_reset</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900 dark:text-white">Alterar Senha</h3>
+                                <p className="text-sm text-gray-500 font-medium">Atualize sua senha de acesso periodicamente.</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nova Senha</label>
+                                <input
+                                    type="password"
+                                    className="h-12 bg-gray-50 dark:bg-gray-900 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl px-4 dark:text-white focus:ring-2 focus:ring-primary transition-all"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">Confirmar Nova Senha</label>
+                                <input
+                                    type="password"
+                                    className="h-12 bg-gray-50 dark:bg-gray-900 border-none ring-1 ring-gray-200 dark:ring-gray-700 rounded-xl px-4 dark:text-white focus:ring-2 focus:ring-primary transition-all"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            <button
+                                className="w-full h-12 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl shadow-lg hover:opacity-90 transition-all active:scale-95 mt-2"
+                                onClick={() => alert('Funcionalidade demonstrativa. Em produção, isso alteraria sua senha via Supabase Auth.')}
+                            >
+                                Atualizar Senha
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 2FA */}
+                    <div className="bg-white dark:bg-surface-dark p-8 rounded-[2.5rem] shadow-premium border border-gray-100 dark:border-gray-800 opacity-75">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-4">
+                                <div className="size-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                    <span className="material-symbols-outlined text-2xl font-bold">domain_verification</span>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-white">Autenticação em Dois Fatores</h3>
+                                    <p className="text-sm text-gray-500 font-medium">Adicione uma camada extra de segurança.</p>
+                                </div>
+                            </div>
+                            <div className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-bold text-gray-500 uppercase">
+                                Em breve
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-[800px] mx-auto flex flex-col gap-8 pb-16">
             <div className="flex flex-col gap-2">
@@ -437,11 +522,11 @@ const SettingsView: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-6">
                 {menuItems.map((item, idx) => {
-                    const isEnabled = item.id === 'integrations' || item.id === 'visual';
+                    const isEnabled = item.id === 'integrations' || item.id === 'visual' || item.id === 'notifications' || item.id === 'security';
                     return (
                         <div
                             key={idx}
-                            onClick={() => isEnabled && setActiveTab(item.id as any)}
+                            onClick={() => isEnabled && setActiveTab(item.id === 'notifications' ? 'telegram' : item.id as any)}
                             className={`bg-white dark:bg-surface-dark p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-premium flex items-center justify-between group transition-all ${isEnabled ? 'cursor-pointer hover:border-primary/30' : 'opacity-60 grayscale-[0.5]'}`}
                         >
                             <div className="flex items-center gap-6">
